@@ -17,3 +17,5 @@ python chub-search-gui.py
 If you don't have the required packages, you may also need to run:
 python -m pip install [package]
 for each package you don't have.
+
+![Example Image](example.png)

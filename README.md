@@ -1,5 +1,7 @@
-# chub-archive-search
+### chub-archive-search
 This is a simple python gui to search the chub archive.
+It comes with a search box, card image preview, and metadata preview.
+You can click on the image to open the subdirectory of that character.
 
 The format of the archive is this:
 main directory
@@ -7,7 +9,7 @@ main directory
             \---an image file
             \---a metadata.json file
 
-Simply drop the python file into the main directory (alongside all the subdirect
+Simply drop the python file into the main directory (alongside all the subdirectories) and run:
 python chub-search-gui.py
 
 If you don't have the required packages, you may also need to run:

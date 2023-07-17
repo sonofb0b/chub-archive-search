@@ -144,7 +144,7 @@ search_label.pack(side=tk.LEFT)
 
 search_entry = tk.Entry(search_frame, width=30)
 search_entry.pack(side=tk.LEFT)
-search_entry.bind("<KeyRelease>", update_listbox)
+search_entry.bind("<Return>", update_listbox)
 
 # Create a scrollbar for the listbox
 scrollbar = tk.Scrollbar(root)

@@ -3,6 +3,7 @@ import os
 import re
 import json
 from PIL import Image, ImageTk
+import base64
 import platform
 
 # Obtain subdirectories
@@ -28,9 +29,11 @@ def show_image(subdirectory):
         canvas.image = photo
         canvas.bind("<Button-1>", lambda event: open_subdirectory(subdirectory))
         show_metadata(subdirectory)
+        show_card(subdirectory)
     else:
         canvas.delete("all")  # Clear the canvas if no image found
         clear_metadata()
+        clear_card()
 
 # Display the relevant metadata from metadata.json in the subdirectory
 def show_metadata(subdirectory):
@@ -50,11 +53,42 @@ def show_metadata(subdirectory):
     else:
         clear_metadata()
 
+# Show card information
+def show_card(subdirectory):
+    current_directory = os.getcwd()
+    image_path = os.path.join(current_directory, subdirectory)
+    image_files = [filename for filename in os.listdir(image_path) if filename.endswith('.png')]
+    if image_files:
+        image_file = image_files[0]
+        image = Image.open(os.path.join(image_path, image_file))
+        if 'chara' in image.info:
+            card = json.loads(base64.b64decode(image.info['chara']))['data']
+            card_text.config(state=tk.NORMAL)
+            description = card['description'] if 'description' in card else ''
+            personality = card['personality'] if 'personality' in card else ''
+            first_mes = card['first_mes'] if 'first_mes' in card else ''
+            mes_example = card['mes_example'] if 'mes_example' in card else ''
+            scenario = card['scenario'] if 'scenario' in card else ''
+            card_text.delete("1.0", tk.END)
+            card_text.insert(tk.END, f"Description: {description}\n\n")
+            card_text.insert(tk.END, f"Personality: {personality}\n\n")
+            card_text.insert(tk.END, f"First Message: {first_mes}\n\n")
+            card_text.insert(tk.END, f"Example Messages: {mes_example}\n\n")
+            card_text.insert(tk.END, f"Scenario: {scenario}\n\n")
+            card_text.config(state=tk.DISABLED)
+    else:
+        clear_card()
+
 # Self explanatory
 def clear_metadata():
     metadata_text.config(state=tk.NORMAL)
     metadata_text.delete("1.0", tk.END)
     metadata_text.config(state=tk.DISABLED)
+
+def clear_card():
+    card_text.config(state=tk.NORMAL)
+    card_text.delete("1.0", tk.END)
+    card_text.config(state=tk.DISABLED)
 
 # Search subdirectories and relevant metadata
 def filter_subdirectories(search_term):
@@ -135,6 +169,16 @@ metadata_label.pack(pady=10)
 
 metadata_text = tk.Text(metadata_frame, wrap=tk.WORD, state=tk.DISABLED)
 metadata_text.pack(fill=tk.BOTH, expand=True)
+
+# Create a frame for the card info
+card_frame = tk.Frame(root)
+card_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+card_label = tk.Label(card_frame, text="Card:")
+card_label.pack(pady=10)
+
+card_text = tk.Text(card_frame, wrap=tk.WORD, state=tk.DISABLED)
+card_text.pack(fill=tk.BOTH, expand=True)
 
 # Get the subdirectories in the current directory
 current_directory = os.getcwd()

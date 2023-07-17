@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import font
 import os
 import re
 import json
@@ -22,7 +23,13 @@ def show_image(subdirectory):
     image_files = [filename for filename in os.listdir(image_path) if filename.endswith('.png')]
     if image_files:
         image_file = image_files[0]
-        image = Image.open(os.path.join(image_path, image_file))
+        try:
+            image = Image.open(os.path.join(image_path, image_file))
+        except:
+            print(f"Image failed to parse for subdirectory {subdirectory}")
+            canvas.delete("all")
+            clear_metadata()
+            return
         image.thumbnail((300, 300))  # Resize the image
         photo = ImageTk.PhotoImage(image)
         canvas.create_image(0, 0, anchor=tk.NW, image=photo)
@@ -60,25 +67,25 @@ def show_metadata(subdirectory, image):
             card_spec_version = card_parsed.get("data", []).get("spec_version")
             metadata_text.config(state=tk.NORMAL)
             metadata_text.delete("1.0", tk.END)
-            metadata_text.insert(tk.END, f"---------- JSON DATA ----------\n\n")
-            metadata_text.insert(tk.END, f"Description: {description}\n\n")
-            metadata_text.insert(tk.END, f"Tagline: {tagline}\n\n")
-            metadata_text.insert(tk.END, f"Topics: {topics}\n\n")
-            metadata_text.insert(tk.END, f"---------- CARD DATA ----------\n\n")
-            metadata_text.insert(tk.END, f"Name: {card_name}\n\n")
-            metadata_text.insert(tk.END, f"Creator: {card_creator}\n\n")
-            metadata_text.insert(tk.END, f"Creator Notes: {card_creator_notes}\n\n")
-            metadata_text.insert(tk.END, f"Tags: {card_tags}\n\n")
-            metadata_text.insert(tk.END, f"Personality: {card_personality}\n\n")
-            metadata_text.insert(tk.END, f"Description:\n{card_description}\n\n")
-            metadata_text.insert(tk.END, f"First Message:\n{card_first_mes}\n\n")
-            metadata_text.insert(tk.END, f"Example Messages:\n{card_example}\n\n")
-            metadata_text.insert(tk.END, f"Scenario: {card_scenario}\n\n")
-            metadata_text.insert(tk.END, f"System Prompt:\n{card_system_prompt}\n\n")
-            metadata_text.insert(tk.END, f"Related Lorebooks: {card_related_lorebooks}\n\n")
-            metadata_text.insert(tk.END, f"Expressions: {card_expressions}\n\n")
-            metadata_text.insert(tk.END, f"Card Spec: {card_spec}\n\n")
-            metadata_text.insert(tk.END, f"Card Spec Version: {card_spec_version}\n\n")
+            metadata_text.insert(tk.END, f"---------- JSON DATA ----------\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Description: {description}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Tagline: {tagline}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Topics: {topics}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"---------- CARD DATA ----------\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Name: {card_name}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Creator: {card_creator}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Creator Notes: {card_creator_notes}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Tags: {card_tags}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Personality: {card_personality}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Description:\n{card_description}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"First Message:\n{card_first_mes}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Example Messages:\n{card_example}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Scenario: {card_scenario}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"System Prompt:\n{card_system_prompt}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Related Lorebooks: {card_related_lorebooks}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Expressions: {card_expressions}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Card Spec: {card_spec}\n\n", "custom_font")
+            metadata_text.insert(tk.END, f"Card Spec Version: {card_spec_version}\n\n", "custom_font")
             metadata_text.config(state=tk.DISABLED)
     else:
         clear_metadata()
@@ -98,11 +105,53 @@ def filter_subdirectories(search_term):
             with open(metadata_file) as f:
                 metadata = json.load(f)
                 if (
-                    re.search(search_term, metadata.get("description", ""), re.IGNORECASE)
-                    or re.search(search_term, metadata.get("tagline", ""), re.IGNORECASE)
+                    re.search(search_term, metadata.get("description"), re.IGNORECASE)
+                    or re.search(search_term, metadata.get("tagline"), re.IGNORECASE)
                     or any(re.search(search_term, topic, re.IGNORECASE) for topic in metadata.get("topics", []))
                 ):
                     filtered_subdirectories.append(subdirectory)
+                    continue
+        if (card_checkbox_var.get() == 1):
+            current_directory = os.getcwd()
+            image_path = os.path.join(current_directory, subdirectory)
+            image_files = [filename for filename in os.listdir(image_path) if filename.endswith('.png')]
+            if image_files:
+                image_file = image_files[0]
+                try:
+                    image = Image.open(os.path.join(image_path, image_file))
+                except:
+                    continue
+                try:
+                    card_data = base64.b64decode(image.info['chara'])
+                except:
+                    continue
+                card_parsed = json.loads(card_data)
+                card_name = card_parsed.get("data", []).get("name")
+                if (card_name is None):
+                    card_name = ""
+                card_creator = card_parsed.get("data", []).get("creator")
+                if (card_creator is None):
+                    card_creator = ""
+                card_personality = card_parsed.get("data", []).get("personality")
+                if (card_personality is None):
+                    card_personality = ""
+                card_tags = card_parsed.get("data", []).get("tags", [])
+                if (card_tags is None):
+                    card_tags = [""]
+                card_description = card_parsed.get("data", []).get("description")
+                if (card_description is None):
+                    card_description = ""
+                if (
+                    re.search(search_term, card_name, re.IGNORECASE)
+                    or re.search(search_term, card_creator, re.IGNORECASE)
+                    or re.search(search_term, card_personality, re.IGNORECASE)
+                    or any(re.search(search_term, tag, re.IGNORECASE) for tag in card_tags)
+                    ):
+                        filtered_subdirectories.append(subdirectory)
+                        continue
+                if (desc_checkbox_var.get() == 1):
+                    if (re.search(search_term, card_description, re.IGNORECASE)):
+                        filtered_subdirectories.append(subdirectory)
     return filtered_subdirectories
 
 # Update the listbox with the search terms
@@ -131,9 +180,27 @@ def on_select(event):
         subdirectory = widget.get(index)
         show_image(subdirectory)
 
+# Change font size
+def toggle_font_size():
+    global default_font_size
+    default_font_size = 16 if checkbox_var.get() else 10
+    default_font.configure(size=default_font_size)
+    metadata_text.tag_configure("custom_font", font=("TkDefaultFont", default_font_size))
+
 # Set title
 root = tk.Tk()
 root.title("Chub Archive Search GUI")
+
+# Default font size
+default_font_size = 10
+
+# Set the default font size for all widgets
+default_font = tk.font.nametofont("TkDefaultFont")
+default_font.configure(size=default_font_size)
+
+# Add checkbox variables
+desc_checkbox_var = tk.IntVar()
+card_checkbox_var = tk.IntVar(value=1)
 
 # Create a search bar
 search_frame = tk.Frame(root)
@@ -145,6 +212,19 @@ search_label.pack(side=tk.LEFT)
 search_entry = tk.Entry(search_frame, width=30)
 search_entry.pack(side=tk.LEFT)
 search_entry.bind("<Return>", update_listbox)
+
+# Create checkbox for big (old man) mode
+checkbox_var = tk.BooleanVar()
+checkbox = tk.Checkbutton(search_frame, text="Old Man Mode", variable=checkbox_var, command=toggle_font_size)
+checkbox.pack(side=tk.RIGHT)
+
+# Create checkbox for card metadata search
+card_checkbox = tk.Checkbutton(search_frame, text="Search Card Metadata", variable=card_checkbox_var)
+card_checkbox.pack(side=tk.RIGHT)
+
+# Create checkbox for description search
+desc_checkbox = tk.Checkbutton(search_frame, text="Search Card Description", variable=desc_checkbox_var)
+desc_checkbox.pack(side=tk.RIGHT)
 
 # Create a scrollbar for the listbox
 scrollbar = tk.Scrollbar(root)
@@ -168,6 +248,8 @@ metadata_label.pack(pady=10)
 
 metadata_text = tk.Text(metadata_frame, wrap=tk.WORD, state=tk.DISABLED)
 metadata_text.pack(fill=tk.BOTH, expand=True)
+
+metadata_text.tag_configure("custom_font", font=("TkDefaultFont", default_font_size))
 
 # Get the subdirectories in the current directory
 current_directory = os.getcwd()

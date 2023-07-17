@@ -206,8 +206,8 @@ card_checkbox_var = tk.IntVar(value=1)
 search_frame = tk.Frame(root)
 search_frame.pack(pady=10)
 
-search_label = tk.Label(search_frame, text="Search:")
-search_label.pack(side=tk.LEFT)
+search_button = tk.Button(search_frame, text="Search:", command=update_listbox)
+search_button.pack(side=tk.LEFT)
 
 search_entry = tk.Entry(search_frame, width=30)
 search_entry.pack(side=tk.LEFT)

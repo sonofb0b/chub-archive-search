@@ -273,11 +273,15 @@ desc_checkbox = tk.Checkbutton(search_frame, text="Search Card Description", var
 desc_checkbox.pack(side=tk.RIGHT)
 
 # Create a scrollbar for the listbox
-scrollbar = tk.Scrollbar(root)
-scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+list_scrollbar = tk.Scrollbar(root)
+list_scrollbar.pack(side=tk.LEFT, fill=tk.Y)
+
+# Create a scrollbar for the metadata textbox
+metadata_scrollbar = tk.Scrollbar(root)
+metadata_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 # Create a listbox
-listbox = tk.Listbox(root, yscrollcommand=scrollbar.set)
+listbox = tk.Listbox(root, yscrollcommand=list_scrollbar.set)
 listbox.pack(side=tk.LEFT, fill=tk.BOTH)
 listbox.bind("<<ListboxSelect>>", on_select)
 
@@ -292,7 +296,7 @@ metadata_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 metadata_label = tk.Label(metadata_frame, text="Metadata:")
 metadata_label.pack(pady=10)
 
-metadata_text = tk.Text(metadata_frame, wrap=tk.WORD, state=tk.DISABLED)
+metadata_text = tk.Text(metadata_frame, wrap=tk.WORD, state=tk.DISABLED, yscrollcommand=metadata_scrollbar.set)
 metadata_text.pack(fill=tk.BOTH, expand=True)
 
 metadata_text.tag_configure("custom_font", font=("TkDefaultFont", default_font_size))
@@ -308,8 +312,9 @@ subdirectories.sort()
 for subdirectory in subdirectories:
     listbox.insert(tk.END, subdirectory)
 
-# Configure the scrollbar
-scrollbar.config(command=listbox.yview)
+# Configure the scrollbars
+list_scrollbar.config(command=listbox.yview)
+metadata_scrollbar.config(command=metadata_text.yview)
 
 # Start the tkinter event loop
 root.mainloop()

@@ -4,10 +4,7 @@ This is a simple python gui to search the chub archive.
 It comes with a search box, card image preview, and metadata preview.
 You can click on the image to open the subdirectory of the character you're viewing.
 
-You can separate search terms by using commas, like this:
-```
-assistant, helpful, information
-```
+You can separate search terms by using commas, like this: `assistant, helpful, information`
 
 ### installation
 
@@ -21,8 +18,8 @@ main directory
 Simply drop the python file into the main directory (alongside all the subdirectories) and run:
 python chub-search-gui.py
 
-If you don't have the required packages, you may also need to run:
-python -m pip install [package]
-for each package you don't have.
+The only package you should need to install is pillow. If you don't have it, run:
+`python -m pip install pillow`
+and you should be good to go.
 
 ![Example Image](example.png)

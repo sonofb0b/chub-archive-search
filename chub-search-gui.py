@@ -3,6 +3,7 @@ import os
 import re
 import json
 from PIL import Image, ImageTk
+import base64
 import platform
 
 # Obtain subdirectories
@@ -27,25 +28,55 @@ def show_image(subdirectory):
         canvas.create_image(0, 0, anchor=tk.NW, image=photo)
         canvas.image = photo
         canvas.bind("<Button-1>", lambda event: open_subdirectory(subdirectory))
-        show_metadata(subdirectory)
+        show_metadata(subdirectory, image)
     else:
         canvas.delete("all")  # Clear the canvas if no image found
         clear_metadata()
 
 # Display the relevant metadata from metadata.json in the subdirectory
-def show_metadata(subdirectory):
+def show_metadata(subdirectory, image):
     metadata_file = os.path.join(subdirectory, "metadata.json")
     if os.path.isfile(metadata_file):
         with open(metadata_file) as f:
             metadata = json.load(f)
-            description = metadata.get("description", "")
-            tagline = metadata.get("tagline", "")
+            description = metadata.get("description")
+            tagline = metadata.get("tagline")
             topics = ", ".join(metadata.get("topics", []))
+            card_data = base64.b64decode(image.info['chara'])
+            card_parsed = json.loads(card_data)
+            card_name = card_parsed.get("data", []).get("name")
+            card_creator = card_parsed.get("data", []).get("creator")
+            card_creator_notes = card_parsed.get("data", []).get("creator_notes")
+            card_tags = ", ".join(card_parsed.get("data", []).get("tags", []))
+            card_description = card_parsed.get("data", []).get("description")
+            card_first_mes = card_parsed.get("data", []).get("first_mes")
+            card_example = card_parsed.get("data", []).get("mes_example")
+            card_scenario = card_parsed.get("data", []).get("scenario")
+            card_system_prompt = card_parsed.get("data", []).get("system_prompt")
+            card_related_lorebooks = ", ".join(card_parsed.get("data", []).get("related_lorebooks", []))
+            card_expressions = ", ".join(card_parsed.get("data", []).get("expressions", []))
+            card_spec = card_parsed.get("data", []).get("spec")
+            card_spec_version = card_parsed.get("data", []).get("spec_version")
             metadata_text.config(state=tk.NORMAL)
             metadata_text.delete("1.0", tk.END)
+            metadata_text.insert(tk.END, f"---------- JSON DATA ----------\n\n")
             metadata_text.insert(tk.END, f"Description: {description}\n\n")
             metadata_text.insert(tk.END, f"Tagline: {tagline}\n\n")
             metadata_text.insert(tk.END, f"Topics: {topics}\n\n")
+            metadata_text.insert(tk.END, f"---------- CARD DATA ----------\n\n")
+            metadata_text.insert(tk.END, f"Name: {card_name}\n\n")
+            metadata_text.insert(tk.END, f"Creator: {card_creator}\n\n")
+            metadata_text.insert(tk.END, f"Creator Notes: {card_creator_notes}\n\n")
+            metadata_text.insert(tk.END, f"Tags: {card_tags}\n\n")
+            metadata_text.insert(tk.END, f"Description:\n{card_description}\n\n")
+            metadata_text.insert(tk.END, f"First Message:\n{card_first_mes}\n\n")
+            metadata_text.insert(tk.END, f"Example Messages:\n{card_example}\n\n")
+            metadata_text.insert(tk.END, f"Scenario: {card_scenario}\n\n")
+            metadata_text.insert(tk.END, f"System Prompt:\n{card_system_prompt}\n\n")
+            metadata_text.insert(tk.END, f"Related Lorebooks: {card_related_lorebooks}\n\n")
+            metadata_text.insert(tk.END, f"Expressions: {card_expressions}\n\n")
+            metadata_text.insert(tk.END, f"Card Spec: {card_spec}\n\n")
+            metadata_text.insert(tk.END, f"Card Spec Version: {card_spec_version}\n\n")
             metadata_text.config(state=tk.DISABLED)
     else:
         clear_metadata()

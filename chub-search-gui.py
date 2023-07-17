@@ -97,20 +97,10 @@ def clear_metadata():
     metadata_text.config(state=tk.DISABLED)
 
 # Search subdirectories and relevant metadata
-def filter_subdirectories(search_term):
+def filter_subdirectories(search_terms):
     filtered_subdirectories = []
     for subdirectory in subdirectories:
         metadata_file = os.path.join(subdirectory, "metadata.json")
-        if os.path.isfile(metadata_file):
-            with open(metadata_file) as f:
-                metadata = json.load(f)
-                if (
-                    re.search(search_term, metadata.get("description"), re.IGNORECASE)
-                    or re.search(search_term, metadata.get("tagline"), re.IGNORECASE)
-                    or any(re.search(search_term, topic, re.IGNORECASE) for topic in metadata.get("topics", []))
-                ):
-                    filtered_subdirectories.append(subdirectory)
-                    continue
         if (card_checkbox_var.get() == 1):
             current_directory = os.getcwd()
             image_path = os.path.join(current_directory, subdirectory)
@@ -141,23 +131,63 @@ def filter_subdirectories(search_term):
                 card_description = card_parsed.get("data", []).get("description")
                 if (card_description is None):
                     card_description = ""
-                if (
-                    re.search(search_term, card_name, re.IGNORECASE)
-                    or re.search(search_term, card_creator, re.IGNORECASE)
-                    or re.search(search_term, card_personality, re.IGNORECASE)
-                    or any(re.search(search_term, tag, re.IGNORECASE) for tag in card_tags)
-                    ):
-                        filtered_subdirectories.append(subdirectory)
-                        continue
                 if (desc_checkbox_var.get() == 1):
-                    if (re.search(search_term, card_description, re.IGNORECASE)):
+                    if os.path.isfile(metadata_file):
+                        with open(metadata_file) as f:
+                            metadata = json.load(f)
+                            if all(
+                                any(
+                                    re.search(search_term, card_name, re.IGNORECASE)
+                                    or re.search(search_term, card_creator, re.IGNORECASE)
+                                    or re.search(search_term, card_personality, re.IGNORECASE)
+                                    or re.search(search_term, card_description, re.IGNORECASE)
+                                    or any(re.search(search_term, tag, re.IGNORECASE) for tag in card_tags)
+                                    or re.search(search_term, metadata.get("description"), re.IGNORECASE)
+                                    or re.search(search_term, metadata.get("tagline"), re.IGNORECASE)
+                                    or any(re.search(search_term, topic, re.IGNORECASE) for topic in metadata.get("topics", []))
+                                    for metadata in [metadata]
+                                )
+                                for search_term in search_terms
+                            ):
+                                filtered_subdirectories.append(subdirectory)
+                else:
+                    if os.path.isfile(metadata_file):
+                        with open(metadata_file) as f:
+                            metadata = json.load(f)
+                            if all(
+                                any(
+                                    re.search(search_term, card_name, re.IGNORECASE)
+                                    or re.search(search_term, card_creator, re.IGNORECASE)
+                                    or re.search(search_term, card_personality, re.IGNORECASE)
+                                    or any(re.search(search_term, tag, re.IGNORECASE) for tag in card_tags)
+                                    or re.search(search_term, metadata.get("description"), re.IGNORECASE)
+                                    or re.search(search_term, metadata.get("tagline"), re.IGNORECASE)
+                                    or any(re.search(search_term, topic, re.IGNORECASE) for topic in metadata.get("topics", []))
+                                    for metadata in [metadata]
+                                )
+                                for search_term in search_terms
+                            ):
+                                filtered_subdirectories.append(subdirectory)
+        else:
+            if os.path.isfile(metadata_file):
+                with open(metadata_file) as f:
+                    metadata = json.load(f)
+                    if all(
+                        any(
+                            re.search(search_term, metadata.get("description"), re.IGNORECASE)
+                            or re.search(search_term, metadata.get("tagline"), re.IGNORECASE)
+                            or any(re.search(search_term, topic, re.IGNORECASE) for topic in metadata.get("topics", []))
+                            for metadata in [metadata]
+                        )
+                        for search_term in search_terms
+                    ):
                         filtered_subdirectories.append(subdirectory)
     return filtered_subdirectories
 
 # Update the listbox with the search terms
 def update_listbox(event=None):
-    search_term = search_entry.get()
-    filtered_subdirectories = filter_subdirectories(search_term)
+    search_terms = [search_term.strip() for search_term in search_entry.get().split(",")]
+    filtered_subdirectories = filter_subdirectories(search_terms)
     listbox.delete(0, tk.END)  # Clear the listbox
     for subdirectory in filtered_subdirectories:
         listbox.insert(tk.END, subdirectory)
@@ -187,6 +217,16 @@ def toggle_font_size():
     default_font.configure(size=default_font_size)
     metadata_text.tag_configure("custom_font", font=("TkDefaultFont", default_font_size))
 
+def off_focus(event):
+    if search_entry.get() == "":
+        search_entry.configure(foreground='gray')
+        search_entry.insert(0, placeholder_text)
+
+def on_focus(event):
+    if search_entry.get() == placeholder_text:
+        search_entry.delete(0, tk.END)
+        search_entry.configure(foreground='black')
+
 # Set title
 root = tk.Tk()
 root.title("Chub Archive Search GUI")
@@ -209,9 +249,15 @@ search_frame.pack(pady=10)
 search_button = tk.Button(search_frame, text="Search:", command=update_listbox)
 search_button.pack(side=tk.LEFT)
 
-search_entry = tk.Entry(search_frame, width=30)
+search_entry = tk.Entry(search_frame, width=50)
 search_entry.pack(side=tk.LEFT)
 search_entry.bind("<Return>", update_listbox)
+
+search_entry.configure(foreground='gray')
+placeholder_text = "Enter comma-separated search terms here..."
+search_entry.insert(0, placeholder_text)
+search_entry.bind('<FocusIn>', on_focus)
+search_entry.bind('<FocusOut>', off_focus)
 
 # Create checkbox for big (old man) mode
 checkbox_var = tk.BooleanVar()

@@ -1,8 +1,15 @@
-### chub-archive-search
+## chub-archive-search
 This is a simple python gui to search the chub archive.
 
 It comes with a search box, card image preview, and metadata preview.
 You can click on the image to open the subdirectory of the character you're viewing.
+
+You can separate search terms by using commas, like this:
+```
+assistant, helpful, information
+```
+
+### installation
 
 The format of the archive should already look like this:
 ```

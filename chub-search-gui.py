@@ -6,6 +6,7 @@ import json
 from PIL import Image, ImageTk
 import base64
 import platform
+import subprocess
 
 # Obtain subdirectories
 def get_subdirectories(path):
@@ -197,9 +198,9 @@ def open_subdirectory(subdirectory):
     current_directory = os.getcwd()
     subdirectory_path = os.path.join(current_directory, subdirectory)
     if platform.system() == "Windows":
-        os.startfile(subdirectory_path)  # Open the subdirectory on Windows
+        subprocess.Popen(["start", "", subdirectory_path], shell=True)  # Open the subdirectory on Windows
     elif platform.system() == "Linux":
-        os.system(f"xdg-open '{subdirectory_path}'")  # Open the subdirectory on Linux
+        subprocess.Popen(["xdg-open", subdirectory_path])  # Open the subdirectory on Linux
 
 # Update when the user selects a subdirectory
 def on_select(event):
